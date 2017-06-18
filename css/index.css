@@ -1,0 +1,250 @@
+body {
+  background-color: rgba(0, 0, 0, 0.1); }
+  body button {
+    cursor: pointer; }
+
+#winner-title {
+  display: none;
+  position: absolute;
+  color: white;
+  text-decoration-line: underline;
+  text-decoration-style: wavy;
+  text-shadow: 5px 5px black;
+  width: 50%;
+  top: 0;
+  left: 25%;
+  text-align: center;
+  z-index: 1;
+  font-weight: bold;
+  font-size: 65px; }
+
+.game-container {
+  position: relative;
+  border-radius: 50%;
+  height: 500px;
+  width: 500px;
+  margin: 50px auto; }
+  @media (max-width: 768px) {
+    .game-container {
+      height: 350px;
+      width: 350px; } }
+  .game-container #red {
+    float: right;
+    height: 250px;
+    width: 250px;
+    border: 15px solid #202020;
+    border-radius: 0 250px 0 0;
+    background-color: #9f0f17; }
+    @media (max-width: 768px) {
+      .game-container #red {
+        height: 175px;
+        width: 175px; } }
+    .game-container #red:focus {
+      outline: none; }
+  .game-container #green {
+    float: left;
+    height: 250px;
+    width: 250px;
+    border: 15px solid #202020;
+    border-radius: 250px 0 0 0;
+    background-color: #00a74a; }
+    @media (max-width: 768px) {
+      .game-container #green {
+        height: 175px;
+        width: 175px; } }
+    .game-container #green:focus {
+      outline: none; }
+  .game-container #blue {
+    float: right;
+    height: 250px;
+    width: 250px;
+    border: 15px solid #202020;
+    border-radius: 0 0 250px 0;
+    background-color: #094a8f; }
+    @media (max-width: 768px) {
+      .game-container #blue {
+        height: 175px;
+        width: 175px; } }
+    .game-container #blue:focus {
+      outline: none; }
+  .game-container #yellow {
+    float: left;
+    height: 250px;
+    width: 250px;
+    border: 15px solid #202020;
+    border-radius: 0 0 0 250px;
+    background-color: #cca707; }
+    @media (max-width: 768px) {
+      .game-container #yellow {
+        height: 175px;
+        width: 175px; } }
+    .game-container #yellow:focus {
+      outline: none; }
+  .game-container .red-light {
+    background-color: #ff4c4c  !important; }
+  .game-container .green-light {
+    background-color: #13ff7c  !important; }
+  .game-container .blue-light {
+    background-color: #1c8cff !important; }
+  .game-container .yellow-light {
+    background-color: #fed93f !important; }
+  .game-container #center-controller {
+    position: absolute;
+    border: 5px solid black;
+    height: 250px;
+    width: 250px;
+    left: 125px;
+    top: 125px;
+    background-color: white;
+    border-radius: 50%; }
+    @media (max-width: 768px) {
+      .game-container #center-controller {
+        height: 175px;
+        width: 175px;
+        left: 87.5px;
+        top: 87.5px; } }
+    .game-container #center-controller h2 {
+      text-align: center;
+      font-size: 30px; }
+      @media (max-width: 768px) {
+        .game-container #center-controller h2 {
+          margin-top: 0px;
+          font-size: 20px; } }
+    .game-container #center-controller .controls-container {
+      margin-top: 0px;
+      display: flex;
+      text-align: center;
+      flex-direction: row;
+      justify-content: space-around; }
+      .game-container #center-controller .controls-container #count-wrapper {
+        width: 50px;
+        height: 50px;
+        border-radius: 5px;
+        display: inline-block; }
+        @media (max-width: 768px) {
+          .game-container #center-controller .controls-container #count-wrapper {
+            width: 40px;
+            height: 40px; }
+            .game-container #center-controller .controls-container #count-wrapper span {
+              font-size: 11px; } }
+      .game-container #center-controller .controls-container #count {
+        border: 3px solid #202020;
+        width: 50px;
+        height: 50px;
+        border-radius: 5px;
+        background-color: #32050C;
+        text-align: center;
+        margin: 0;
+        padding: 0;
+        color: red;
+        font-size: 40px; }
+        @media (max-width: 768px) {
+          .game-container #center-controller .controls-container #count {
+            width: 40px;
+            height: 40px;
+            font-size: 33px; } }
+      .game-container #center-controller .controls-container #start-wrapper {
+        text-align: center;
+        width: 50px;
+        height: 50px;
+        border-radius: 5px;
+        display: inline-block; }
+        @media (max-width: 768px) {
+          .game-container #center-controller .controls-container #start-wrapper {
+            width: 40px;
+            height: 40px; }
+            .game-container #center-controller .controls-container #start-wrapper span {
+              font-size: 11px; } }
+      .game-container #center-controller .controls-container #start-button {
+        border: 3px solid #202020;
+        border-radius: 50%;
+        width: 25px;
+        height: 25px;
+        margin: 10px auto;
+        background-color: green; }
+      .game-container #center-controller .controls-container #strict-wrapper {
+        text-align: center;
+        width: 50px;
+        height: 50px;
+        border-radius: 5px;
+        display: inline-block; }
+        @media (max-width: 768px) {
+          .game-container #center-controller .controls-container #strict-wrapper {
+            width: 40px;
+            height: 40px; }
+            .game-container #center-controller .controls-container #strict-wrapper span {
+              font-size: 11px; } }
+      .game-container #center-controller .controls-container #strict-button {
+        border: 3px solid #202020;
+        border-radius: 50%;
+        width: 25px;
+        height: 25px;
+        margin: 10px auto;
+        background-color: yellow; }
+      .game-container #center-controller .controls-container #strict-led {
+        border: 1px solid #202020;
+        border-radius: 50%;
+        width: 10px;
+        height: 10px;
+        margin: auto;
+        background-color: blue; }
+      .game-container #center-controller .controls-container .led-on {
+        background-color: #32050C !important; }
+    .game-container #center-controller #on-wrapper {
+      display: inline-block;
+      position: absolute;
+      width: 200px;
+      height: 30px;
+      top: 65%;
+      left: 50%;
+      margin-left: -100px;
+      text-align: center; }
+      @media (max-width: 768px) {
+        .game-container #center-controller #on-wrapper {
+          font-size: 10px; } }
+    .game-container #center-controller .switch {
+      display: inline-block; }
+    .game-container #center-controller #switch-box {
+      border: 1px solid #202020;
+      width: 60px;
+      height: 20px;
+      margin-left: 5px;
+      margin-right: 5px;
+      margin-top: 5px;
+      background-color: #202020; }
+    .game-container #center-controller #on-side {
+      display: none;
+      width: 20px;
+      height: 20px;
+      float: right;
+      background-color: red;
+      border: none; }
+      .game-container #center-controller #on-side:focus {
+        border: none;
+        outline: none; }
+    .game-container #center-controller #off-side {
+      display: block;
+      width: 20px;
+      height: 20px;
+      float: left;
+      background-color: red;
+      border: none; }
+      .game-container #center-controller #off-side:focus {
+        border: none;
+        outline: none; }
+    .game-container #center-controller button.start {
+      border: none;
+      background: none; }
+      .game-container #center-controller button.start:focus {
+        outline: none; }
+    .game-container #center-controller button.strict {
+      border: none;
+      background: none; }
+      .game-container #center-controller button.strict:focus {
+        outline: none; }
+    .game-container #center-controller #count > p {
+      display: block;
+      vertical-align: middle;
+      line-height: 47px;
+      font-size: 40px;
+      color: red; }
