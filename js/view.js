@@ -1,36 +1,38 @@
-(function (window) {
+(function (exports) {
 
   'use strict'
 
   function View () {
     var self = this;
 
-    this.$buttonColors = {
+    self.$buttonColors = {
       'red': document.getElementById('red'),
       'green': document.getElementById('green'),
       'yellow': document.getElementById('yellow'),
       'blue': document.getElementById('blue')
     }
 
-    this.$buttonColorSounds = {
+    self.$buttonColorSounds = {
       'red': new Audio('https://s3.amazonaws.com/freecodecamp/simonSound2.mp3'),
       'green': new Audio('https://s3.amazonaws.com/freecodecamp/simonSound1.mp3'),
       'yellow': new Audio('https://s3.amazonaws.com/freecodecamp/simonSound3.mp3'),
-      'blue': new Audio('https://s3.amazonaws.com/freecodecamp/simonSound4.mp3'),
-      'error': new Audio('http://www.zapsplat.com/wp-content/uploads/2015/sound-effects-three/leisure_retro_arcade_game_incorrect_error_tone.mp3')
+      'blue': new Audio('https://s3.amazonaws.com/freecodecamp/simonSound4.mp3')
     }
 
-    this.$countDisplay = document.getElementById('count');
+    self.$countDisplay = document.getElementById('count');
 
-    this.$startButton = document.getElementById('start-button');
+    self.$startButton = document.getElementById('start-button');
 
-    this.$strictButton = document.getElementById('strict-button');
-    this.$strictLedDisplay = document.getElementById('strict-led');
+    self.$strictButton = document.getElementById('strict-button');
+    self.$strictLedDisplay = document.getElementById('strict-led');
 
-    this.$offSideButton = document.getElementById('off-side');
-    this.$onSideButton = document.getElementById('on-side');
+    self.$offSideButton = document.getElementById('off-side');
+    self.$onSideButton = document.getElementById('on-side');
 
-    this.$winnerTitle = document.getElementById('winner-title');
+    self.$winnerModal = document.getElementById('winner-modal');
+
+    self.$playAgainButton = document.getElementById('play-again');
+
 
   }
 
@@ -46,7 +48,7 @@
         handler();
       })
     }
-    if (event === 'startGame') {
+    if (event === 'startSimon') {
       self.$startButton.addEventListener('click', function () {
         handler();
       })
@@ -59,9 +61,14 @@
     if (event === 'chooseColor') {
       for (var buttonColor in self.$buttonColors) {
         self.$buttonColors[buttonColor].addEventListener('click', function (e) {
-          handler(e);
+          handler(e.target.id);
         })
       }
+    }
+    if (event === 'playAgain') {
+      self.$playAgainButton.addEventListener('click', function () {
+        handler()
+      })
     }
   }
 
@@ -73,16 +80,14 @@
         self.$countDisplay.innerText = '';
         self.$countDisplay.innerText = state.count;
       },
+      'displayCountError': function () {
+        self.$countDisplay.innerText = '!!';
+        setTimeout(function () {self.$countDisplay.innerText = state.count;}, 500);
+      },
       'displayLightOn': function () {
         self.$buttonColors[state.color].className = state.color +'-light';
         self.$buttonColorSounds[state.color].play();
-      },
-      'displayErrorLightOn': function () {
-        self.$buttonColors[state.color].className = state.color +'-light';
-        self.$buttonColorSounds['error'].play();
-      },
-      'displayLightOff': function () {
-        self.$buttonColors[state.color].className = '';
+        setTimeout(function () {self.$buttonColors[state.color].className = '';},500);
       },
       'displayStrictOn': function () {
         self.$strictLedDisplay.className = 'led-on';
@@ -98,17 +103,18 @@
         self.$onSideButton.style.display = 'none';
         self.$offSideButton.style.display = 'block';
       },
-      'displayWinnerTitle': function () {
-        self.$winnerTitle.style.display = 'block';
+      'displayWinnerModal': function () {
+        self.$winnerModal.style.display = 'block';
+
       },
-      'hideWinnerTitle': function () {
-        self.$winnerTitle.style.display = 'none';
+      'hideWinnerModal': function () {
+        self.$winnerModal.style.display = 'none';
       }
     }
     viewCommands[cmd]();
 
   }
 
-  window.app = window.app || {};
-  window.app.View = View;
+  exports.app = exports.app || {};
+  exports.app.View = View;
 }(window))

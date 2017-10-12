@@ -1,34 +1,35 @@
-(function (window) {
+(function (exports) {
 
   'use strict'
 
   function Model () {
-    this.state = {
-      on: false,
-      strictMode: false,
-      playerTurn: false,
-      speed: 1300,
-      simonChoices: [],
-      correctChoices: [],
-      correctCount: 0,
-      playerChoice: ''
-    }
-  }
-
-
-
-  Model.prototype.setState = function (state, cb) {
     var self = this;
-    self.state = Object.assign(
-      {},
-      self.state,
-      state
-    )
-    cb(self.state);
+
+    self.on = false;
+    self.started = false;
+    self.strictMode = false;
+    self.userTurn = false;
+    self.speed = 1300;
+    self.compPattern = [];
+    self.userPattern = [];
+    self.correctCount = 0;
+    self.colors = ['red','green','yellow','blue'];
   }
 
+  Model.prototype.setProps = function (props) {
+    var self = this;
+    for (var prop in props) {
+      self[prop] = props[prop];
+    }
+    return self;
+  }
 
+  Model.prototype.reset = function () {
+    var self = this;
+    self = new Model()
+    return self;
+  }
 
-  window.app = window.app || {};
-  window.app.Model = Model;
+  exports.app = exports.app || {};
+  exports.app.Model = Model;
 }(window))

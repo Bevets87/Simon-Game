@@ -1,22 +1,36 @@
+@import url("https://fonts.googleapis.com/css?family=Bungee+Shade");
 body {
   background-color: rgba(0, 0, 0, 0.1); }
   body button {
     cursor: pointer; }
 
-#winner-title {
-  display: none;
+#winner-modal {
   position: absolute;
-  color: white;
-  text-decoration-line: underline;
-  text-decoration-style: wavy;
-  text-shadow: 5px 5px black;
-  width: 50%;
-  top: 0;
-  left: 25%;
+  display: none;
+  width: 50vw;
+  height: 350px;
+  color: black;
+  background: rgba(255, 255, 255, 0.9);
+  left: 25vw;
+  z-index: 1000;
   text-align: center;
-  z-index: 1;
-  font-weight: bold;
-  font-size: 65px; }
+  border-radius: 50px; }
+  @media (max-width: 768px) {
+    #winner-modal {
+      width: 100vw;
+      left: 0vw; } }
+  #winner-modal h1 {
+    margin: none;
+    padding: none;
+    font-family: 'Bungee Shade', cursive;
+    font-size: 50px; }
+  #winner-modal button {
+    margin: none;
+    border: none;
+    outline: none;
+    background: none;
+    font-family: 'Bungee Shade', cursive;
+    font-size: 35px; }
 
 .game-container {
   position: relative;
