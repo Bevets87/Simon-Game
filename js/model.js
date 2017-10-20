@@ -26,7 +26,7 @@
 
   Model.prototype.reset = function () {
     var self = this;
-    self = new Model()
+    self = new Model();
     return self;
   }
 

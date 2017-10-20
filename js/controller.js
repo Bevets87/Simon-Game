@@ -8,6 +8,7 @@
     self.model = model;
     self.view = view;
 
+    /**HELPER FUNCTIONS**/
     var {
       cyclePattern,
       getRandomColor,
@@ -18,6 +19,8 @@
       isWinner
     } = self;
 
+
+    /**TURN ON**/
     self.view.bind('turnSimonOn', function () {
       /*MODEL ACTIONS*/
       self.model.setProps({
@@ -27,9 +30,9 @@
       self.view.render(
         'displayOnMode'
       );
-
     })
 
+    /**TURN OFF**/
     self.view.bind('turnSimonOff', function () {
       /*MODEL ACTIONS*/
       self.model = self.model.reset();
@@ -45,6 +48,7 @@
       );
     })
 
+    /**TOGGLE STRICT**/
     self.view.bind('toggleStrictMode', function () {
       if (self.model.on) {
         /*MODEL ACTIONS*/
@@ -58,6 +62,7 @@
       }
     })
 
+    /**START GAME**/
     self.view.bind('startSimon', function () {
       if (self.model.on && !self.model.started) {
         /*MODEL ACTIONS*/
@@ -85,6 +90,7 @@
       }
     })
 
+    /**RESPOND TO USER'S CHOICE**/
     self.view.bind('chooseColor', function (userChoice) {
       if (self.model.userTurn) {
         /*MODEL ACTIONS*/
@@ -96,24 +102,29 @@
         self.view.render(
           'displayLightOn', {color: userChoice}
         );
-        if ( patternsMatch(self.model.userPattern, self.model.compPattern) ) {
-          self.model.setProps({
-            'userTurn': true
-          })
-          if ( patternIsComplete(self.model.userPattern, self.model.compPattern) ) {
+
+        /*HANDLE CORRECT USER CHOICE*/
+        if (patternsMatch(self.model.userPattern, self.model.compPattern)) {
+          if (patternIsComplete(self.model.userPattern, self.model.compPattern)) {
+            /*MODEL ACTIONS*/
             self.model.setProps({
               'correctCount': ++self.model.correctCount,
               'speed': self.model.correctCount > 7 ? 700 : self.model.speed,
               'userPattern': [],
               'compPattern': addToPattern(getRandomColor(self.model.colors), self.model.compPattern)
             });
+            /*VIEW ACTIONS*/
             self.view.render(
               'displayCount', {count: self.model.correctCount}
             );
+
+            /*HANDLE WINNING CASE*/
             if (isWinner(self.model.correctCount, 15)) {
+              /*MODEL ACTIONS*/
               self.model.setProps({
                 'userTurn': false
               })
+              /*VIEW ACTIONS*/
               self.view.render(
                 'displayWinnerModal'
               );
@@ -123,23 +134,34 @@
                 self.model.compPattern,
                 function (color, cycle) {
                 if (self.model.on) {
+                  /*MODEL ACTIONS*/
                   self.model.setProps({
                     'userTurn': cycle === self.model.compPattern.length ? true : false
                   });
+                  /*VIEW ACTIONS*/
                   self.view.render(
                     'displayLightOn', {color: color}
                   );
                 }
               })
             }
+          } else {
+            /*MODEL ACTIONS*/
+            self.model.setProps({
+              'userTurn': true
+            })
           }
+
+        /*HANDLE INCORRECT USER CHOICE*/
         } else {
+          /*MODEL ACTIONS*/
           self.model.setProps({
             'userPattern': [],
             'compPattern': self.model.strictMode ? addToPattern(getRandomColor(self.model.colors), []) : self.model.compPattern,
             'correctCount': self.model.strictMode ? 0 : self.model.correctCount,
             'speed': self.model.strictMode ? 1300 : self.model.speed
           });
+          /*VIEW ACTIONS*/
           self.view.render(
             'displayCountError', {count: self.model.correctCount}
           );
@@ -148,9 +170,11 @@
             self.model.compPattern,
             function (color, cycle) {
             if (self.model.on) {
+              /*MODEL ACTIONS*/
               self.model.setProps({
                 'userTurn': cycle === self.model.compPattern.length ? true : false
               })
+              /*VIEW ACTIONS*/
               self.view.render(
                 'displayLightOn', {color: color}
               );
@@ -160,32 +184,38 @@
       }
     })
 
+    /**RESET GAME**/
     self.view.bind('playAgain', function () {
+      /*MODEL ACTIONS*/
       self.model = self.model.reset();
-      self.view.render(
-        'hideWinnerModal'
-      );
       self.model.setProps({
         'on': true,
         'started': true,
         'compPattern': addToPattern(getRandomColor(self.model.colors), self.model.compPattern)
       });
+      /*VIEW ACTIONS*/
       self.view.render(
         'displayCount', {count: self.model.correctCount}
+      );
+      self.view.render(
+        'hideWinnerModal'
       );
       cyclePattern(
         self.model.speed,
         self.model.compPattern,
         function (color) {
+          /*VIEW ACTIONS*/
           self.view.render(
             'displayLightOn',{color: color}
           );
+          /*MODEL ACTIONS*/
           self.model.setProps({
           'userTurn': true
         });
       })
     })
 
+  /**END OF CONTROLLER CONSTRUCTOR**/
   }
 
 
