@@ -76,16 +76,16 @@
         );
         cyclePattern(
           self.model.speed,
-          self.model.compPattern,
-          function (color) {
+          function (cycle, interval) {
             /*VIEW ACTIONS*/
             self.view.render(
-              'displayLightOn',{color: color}
+              'displayLightOn',{color: self.model.compPattern[cycle]}
             );
             /*MODEL ACTIONS*/
             self.model.setProps({
             'userTurn': true
           });
+          clearInterval(interval)
         })
       }
     })
@@ -131,17 +131,21 @@
             } else {
               cyclePattern(
                 self.model.speed,
-                self.model.compPattern,
-                function (color, cycle) {
+                function (cycle, interval) {
                 if (self.model.on) {
-                  /*MODEL ACTIONS*/
-                  self.model.setProps({
-                    'userTurn': cycle === self.model.compPattern.length ? true : false
-                  });
                   /*VIEW ACTIONS*/
                   self.view.render(
-                    'displayLightOn', {color: color}
+                    'displayLightOn', {color: self.model.compPattern[cycle]}
                   );
+                  if ((cycle + 1) === self.model.compPattern.length) {
+                    /*MODEL ACTIONS*/
+                    self.model.setProps({
+                      'userTurn': true
+                    });
+                    clearInterval(interval);
+                  }
+                } else {
+                  clearInterval(interval);
                 }
               })
             }
@@ -167,17 +171,21 @@
           );
           cyclePattern(
             self.model.speed,
-            self.model.compPattern,
-            function (color, cycle) {
+            function (cycle, interval) {
             if (self.model.on) {
-              /*MODEL ACTIONS*/
-              self.model.setProps({
-                'userTurn': cycle === self.model.compPattern.length ? true : false
-              })
               /*VIEW ACTIONS*/
               self.view.render(
-                'displayLightOn', {color: color}
+                'displayLightOn', {color: self.model.compPattern[cycle]}
               );
+              if ((cycle + 1) === self.model.compPattern.length) {
+                /*MODEL ACTIONS*/
+                self.model.setProps({
+                  'userTurn': true
+                })
+                clearInterval(interval);
+              }
+            } else {
+              clearInterval(interval)
             }
           });
         }
@@ -202,16 +210,16 @@
       );
       cyclePattern(
         self.model.speed,
-        self.model.compPattern,
-        function (color) {
+        function (cycle, interval) {
           /*VIEW ACTIONS*/
           self.view.render(
-            'displayLightOn',{color: color}
+            'displayLightOn',{color: self.model.compPattern[cycle]}
           );
           /*MODEL ACTIONS*/
           self.model.setProps({
           'userTurn': true
         });
+        clearInterval(interval);
       })
     })
 
@@ -228,14 +236,12 @@
     return colors[randomIndex];
   }
 
-  Controller.prototype.cyclePattern = function (speed, array = [], callback) {
-    for (var i = 0; i < array.length; i++) {
-      (function (i) {
-        setTimeout(function () {
-          callback(array[i], (i + 1))
-        }, speed * (i + 1));
-      }(i))
-    }
+  Controller.prototype.cyclePattern = function (speed, callback) {
+    var cycle = 0;
+    var interval = setInterval(function () {
+      callback(cycle, interval);
+      cycle++;
+    }, speed)
   }
 
   Controller.prototype.resetPattern = function () {
