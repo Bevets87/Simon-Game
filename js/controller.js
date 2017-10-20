@@ -19,16 +19,21 @@
     } = self;
 
     self.view.bind('turnSimonOn', function () {
+      /*MODEL ACTIONS*/
       self.model.setProps({
         'on': true
       });
+      /*VIEW ACTIONS*/
       self.view.render(
         'displayOnMode'
       );
+
     })
 
     self.view.bind('turnSimonOff', function () {
+      /*MODEL ACTIONS*/
       self.model = self.model.reset();
+      /*VIEW ACTIONS*/
       self.view.render(
         'displayOffMode'
       );
@@ -42,9 +47,11 @@
 
     self.view.bind('toggleStrictMode', function () {
       if (self.model.on) {
+        /*MODEL ACTIONS*/
         self.model.setProps({
           'strictMode': self.model.strictMode ? false : true
         });
+        /*VIEW ACTIONS*/
         self.view.render(
           self.model.strictMode ? 'displayStrictOn' : 'displayStrictOff'
         );
@@ -53,10 +60,12 @@
 
     self.view.bind('startSimon', function () {
       if (self.model.on && !self.model.started) {
+        /*MODEL ACTIONS*/
         self.model.setProps({
           'compPattern': addToPattern(getRandomColor(self.model.colors), self.model.compPattern),
           'started': true
         });
+        /*VIEW ACTIONS*/
         self.view.render(
           'displayCount', {count: self.model.correctCount}
         );
@@ -64,9 +73,11 @@
           self.model.speed,
           self.model.compPattern,
           function (color) {
+            /*VIEW ACTIONS*/
             self.view.render(
               'displayLightOn',{color: color}
             );
+            /*MODEL ACTIONS*/
             self.model.setProps({
             'userTurn': true
           });
@@ -76,14 +87,19 @@
 
     self.view.bind('chooseColor', function (userChoice) {
       if (self.model.userTurn) {
+        /*MODEL ACTIONS*/
         self.model.setProps({
           'userTurn': false,
           'userPattern': addToPattern(userChoice, self.model.userPattern)
         });
+        /*VIEW ACTIONS*/
         self.view.render(
           'displayLightOn', {color: userChoice}
         );
         if ( patternsMatch(self.model.userPattern, self.model.compPattern) ) {
+          self.model.setProps({
+            'userTurn': true
+          })
           if ( patternIsComplete(self.model.userPattern, self.model.compPattern) ) {
             self.model.setProps({
               'correctCount': ++self.model.correctCount,
@@ -116,10 +132,6 @@
                 }
               })
             }
-          } else {
-            self.model.setProps({
-              'userTurn': true
-            })
           }
         } else {
           self.model.setProps({
@@ -222,6 +234,8 @@
   Controller.prototype.isWinner = function (currentCount, winningCount) {
     return currentCount === winningCount;
   }
+
+
 
   exports.app = exports.app || {};
   exports.app.Controller = Controller;
