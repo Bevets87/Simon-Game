@@ -1,5 +1,5 @@
 # Simon-Game
-[]()
+[https://bevets87.github.io/Simon-Game/](https://bevets87.github.io/Simon-Game/)
 
 ### User Stories:
 
