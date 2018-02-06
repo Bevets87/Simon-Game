@@ -1,7 +1,6 @@
 (function (exports) {
 
   'use strict'
-
   function View () {
     var self = this;
 
@@ -32,8 +31,6 @@
     self.$winnerModal = document.getElementById('winner-modal');
 
     self.$playAgainButton = document.getElementById('play-again');
-
-
   }
 
   View.prototype.bind = function (event, handler) {
@@ -76,34 +73,43 @@
     var self = this;
 
     var viewCommands = {
-      'displayCount': function () {
+      'count': function () {
+        var { correctCount } = state;
         self.$countDisplay.innerText = '';
-        self.$countDisplay.innerText = state.count;
+        self.$countDisplay.innerText = correctCount;
       },
-      'displayCountError': function () {
+      'incorrect': function () {
+        var { correctCount } = state;
         self.$countDisplay.innerText = '!!';
-        setTimeout(function () {self.$countDisplay.innerText = state.count;}, 500);
+        setTimeout(function () {self.$countDisplay.innerText = correctCount;}, 500);
       },
-      'displayLightOn': function () {
-        self.$buttonColors[state.color].className = state.color +'-light';
-        self.$buttonColorSounds[state.color].play();
-        setTimeout(function () {self.$buttonColors[state.color].className = '';},500);
+      'color': function () {
+        var { color } = state;
+        if (color) {
+          self.$buttonColors[color].className = color +'-light';
+          self.$buttonColorSounds[color].play();
+          setTimeout(function () {self.$buttonColors[color].className = '';},500);
+        }
       },
-      'displayStrictOn': function () {
+      'strictLightOn': function () {
         self.$strictLedDisplay.className = 'led-on';
       },
-      'displayStrictOff': function () {
+      'strictLightOff': function () {
         self.$strictLedDisplay.className = '';
       },
-      'displayOnMode': function () {
+      'onMode': function () {
         self.$offSideButton.style.display = 'none';
         self.$onSideButton.style.display = 'block';
+        self.$countDisplay.innerText = '';
+        self.$countDisplay.innerText = '--';
       },
-      'displayOffMode': function () {
+      'offMode': function () {
         self.$onSideButton.style.display = 'none';
         self.$offSideButton.style.display = 'block';
+        self.$countDisplay.innerText = '';
+        self.$strictLedDisplay.className = '';
       },
-      'displayWinnerModal': function () {
+      'winnerModal': function () {
         self.$winnerModal.style.display = 'block';
 
       },
@@ -117,4 +123,4 @@
 
   exports.app = exports.app || {};
   exports.app.View = View;
-}(window))
+})(window)

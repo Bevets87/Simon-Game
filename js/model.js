@@ -5,31 +5,39 @@
   function Model () {
     var self = this;
 
-    self.on = false;
-    self.started = false;
-    self.strictMode = false;
-    self.userTurn = false;
-    self.speed = 1300;
-    self.compPattern = [];
-    self.userPattern = [];
-    self.correctCount = 0;
-    self.colors = ['red','green','yellow','blue'];
-  }
+    self.state = {
+      on: false,
+      started: false,
 
-  Model.prototype.setProps = function (props) {
-    var self = this;
-    for (var prop in props) {
-      self[prop] = props[prop];
+      strictMode: false,
+
+      simonSpeed: 1300,
+      simonChain: new Iterator(new Array()),
+      simonIntervalID: null,
+
+      userChain: new Array(),
+      userChoice: null,
+      userTurn: false,
+
+      correctCount: 0
     }
-    return self;
   }
 
-  Model.prototype.reset = function () {
+  Model.prototype.setState = function (newState, cb) {
     var self = this;
-    self = new Model();
-    return self;
+    cb = cb || null;
+    self.state = Object.assign(
+      {},
+      self.state,
+      newState
+    )
+    if (cb) {
+      cb(self.state)
+    }
+    return self.state;
   }
 
   exports.app = exports.app || {};
   exports.app.Model = Model;
-}(window))
+
+})(window)

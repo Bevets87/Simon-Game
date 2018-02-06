@@ -8,271 +8,189 @@
     self.model = model;
     self.view = view;
 
-    /**HELPER FUNCTIONS**/
-    var {
-      cyclePattern,
-      getRandomColor,
-      patternsMatch,
-      patternIsComplete,
-      resetPattern,
-      addToPattern,
-      isWinner
-    } = self;
-
-
-    /**TURN ON**/
     self.view.bind('turnSimonOn', function () {
-      /*MODEL ACTIONS*/
-      self.model.setProps({
-        'on': true
-      });
-      /*VIEW ACTIONS*/
-      self.view.render(
-        'displayOnMode'
-      );
+      self.set('simonOn')
     })
 
-    /**TURN OFF**/
     self.view.bind('turnSimonOff', function () {
-      /*MODEL ACTIONS*/
-      self.model = self.model.reset();
-      /*VIEW ACTIONS*/
-      self.view.render(
-        'displayOffMode'
-      );
-      self.view.render(
-        'displayCount', {count: null}
-      );
-      self.view.render(
-        'displayStrictOff'
-      );
+      self.set('simonOff', self.model.state)
     })
 
-    /**TOGGLE STRICT**/
     self.view.bind('toggleStrictMode', function () {
-      if (self.model.on) {
-        /*MODEL ACTIONS*/
-        self.model.setProps({
-          'strictMode': self.model.strictMode ? false : true
-        });
-        /*VIEW ACTIONS*/
-        self.view.render(
-          self.model.strictMode ? 'displayStrictOn' : 'displayStrictOff'
-        );
+      self.set('strictMode', self.model.state)
+    })
+
+    self.view.bind('startSimon', function () {
+      self._handleStartSimon(self.model.state)
+    })
+
+    self.view.bind('chooseColor', function (color) {
+      if ( self.model.state.userTurn ) {
+        self._isCorrect({...self.model.state, color })
       }
     })
 
-    /**START GAME**/
-    self.view.bind('startSimon', function () {
-      if (self.model.on && !self.model.started) {
-        /*MODEL ACTIONS*/
-        self.model.setProps({
-          'compPattern': addToPattern(getRandomColor(self.model.colors), self.model.compPattern),
-          'started': true
-        });
-        /*VIEW ACTIONS*/
-        self.view.render(
-          'displayCount', {count: self.model.correctCount}
-        );
-        cyclePattern(
-          self.model.speed,
-          function (cycle, interval) {
-            /*VIEW ACTIONS*/
-            self.view.render(
-              'displayLightOn',{color: self.model.compPattern[cycle]}
-            );
-            /*MODEL ACTIONS*/
-            self.model.setProps({
-            'userTurn': true
-          });
-          clearInterval(interval)
+    self.view.bind('playAgain', function () {
+      self._handleStartSimon(self.model.state)
+    })
+
+  }
+
+  /* Command Pattern to abstract away Controller updates to the Model that render a new View */
+  Controller.prototype.set = function (command, payload) {
+    var self = this;
+    var stateCommands = {
+      'simonOn': function () {
+        return self.model.setState({on: true}, function () {
+          self.view.render('onMode')
+        })
+      },
+      'simonOff': function () {
+        var { simonIntervalID } = payload; clearInterval(simonIntervalID);
+        return self.model.setState({
+          on: false, started: false, strictMode: false, simonIntervalID: null,
+          simonSpeed: 1300, simonChain: new Iterator(new Array()),
+          userChain: new Array(), userChoice: null, userTurn: false, correctCount: 0
+        }, function () {
+          self.view.render('offMode')
+        })
+      },
+      'strictMode': function () {
+        var { on, strictMode } = payload;
+        return self.model.setState({
+          strictMode: on ? !strictMode : false
+        }, function ({ strictMode }) {
+          self.view.render(strictMode ? 'strictLightOn' : 'strictLightOff')
+        })
+      },
+      'count': function () {
+        var { correctCount } = payload;
+        return self.model.setState({
+          correctCount: correctCount
+        }, function ({ correctCount }) {
+          self.view.render('count', { correctCount: correctCount })
+        })
+      },
+      'correct': function () {
+        var { userChoice, userChain } = payload;
+        return self.model.setState({
+          userChain: [...userChain, userChoice ],
+          userChoice: null, userTurn: true
+        }, function () {
+          self.view.render('color', {color: userChoice})
+        })
+      },
+      'incorrect': function () {
+        var { userChoice, strictMode, correctCount } = payload;
+        return self.model.setState({
+          userChain: [], userChoice: null,
+          userTurn: false, correctCount: strictMode ? 0 : correctCount
+        }, function ({ correctCount }) {
+          self.view.render('color', { color: userChoice })
+          self.view.render('incorrect', { correctCount: correctCount })
+        })
+      },
+      'simonSequence': function () {
+        var { simonChain, simonSpeed } = payload,
+        next, userTurn, handler = setInterval(function () {
+          if (simonChain.hasNext()) {
+            next = simonChain.next(); userTurn = false;
+          } else {
+            simonChain.reset(); clearInterval(handler);
+            handler = null; next = null; userTurn = true;
+          }
+          self.model.setState({
+            simonIntervalID: handler,
+            simonChain, userTurn
+          }, function () {
+            self.view.render('color', {color: next})
+          })
+        }, simonSpeed)
+      },
+      'winner': function () {
+        return self.model.setState({
+          simonSpeed: 1300, simonChain: new Iterator(new Array()),
+          simonIntervalID: null, userChain: new Array(), userTurn: false,
+          correctCount: 0, started: false, userChoice: null
+        }, function () {
+          self.view.render('winnerModal')
         })
       }
-    })
-
-    /**RESPOND TO USER'S CHOICE**/
-    self.view.bind('chooseColor', function (userChoice) {
-      if (self.model.userTurn) {
-        /*MODEL ACTIONS*/
-        self.model.setProps({
-          'userTurn': false,
-          'userPattern': addToPattern(userChoice, self.model.userPattern)
-        });
-        /*VIEW ACTIONS*/
-        self.view.render(
-          'displayLightOn', {color: userChoice}
-        );
-
-        /*HANDLE CORRECT USER CHOICE*/
-        if (patternsMatch(self.model.userPattern, self.model.compPattern)) {
-          if (patternIsComplete(self.model.userPattern, self.model.compPattern)) {
-            /*MODEL ACTIONS*/
-            self.model.setProps({
-              'correctCount': ++self.model.correctCount,
-              'speed': self.model.correctCount > 7 ? 700 : self.model.speed,
-              'userPattern': [],
-              'compPattern': addToPattern(getRandomColor(self.model.colors), self.model.compPattern)
-            });
-            /*VIEW ACTIONS*/
-            self.view.render(
-              'displayCount', {count: self.model.correctCount}
-            );
-
-            /*HANDLE WINNING CASE*/
-            if (isWinner(self.model.correctCount, 15)) {
-              /*MODEL ACTIONS*/
-              self.model.setProps({
-                'userTurn': false
-              })
-              /*VIEW ACTIONS*/
-              self.view.render(
-                'displayWinnerModal'
-              );
-            } else {
-              cyclePattern(
-                self.model.speed,
-                function (cycle, interval) {
-                if (self.model.on) {
-                  /*VIEW ACTIONS*/
-                  self.view.render(
-                    'displayLightOn', {color: self.model.compPattern[cycle]}
-                  );
-                  if ((cycle + 1) === self.model.compPattern.length) {
-                    /*MODEL ACTIONS*/
-                    self.model.setProps({
-                      'userTurn': true
-                    });
-                    clearInterval(interval);
-                  }
-                } else {
-                  clearInterval(interval);
-                }
-              })
-            }
-          } else {
-            /*MODEL ACTIONS*/
-            self.model.setProps({
-              'userTurn': true
-            })
-          }
-
-        /*HANDLE INCORRECT USER CHOICE*/
-        } else {
-          /*MODEL ACTIONS*/
-          self.model.setProps({
-            'userPattern': [],
-            'compPattern': self.model.strictMode ? addToPattern(getRandomColor(self.model.colors), []) : self.model.compPattern,
-            'correctCount': self.model.strictMode ? 0 : self.model.correctCount,
-            'speed': self.model.strictMode ? 1300 : self.model.speed
-          });
-          /*VIEW ACTIONS*/
-          self.view.render(
-            'displayCountError', {count: self.model.correctCount}
-          );
-          cyclePattern(
-            self.model.speed,
-            function (cycle, interval) {
-            if (self.model.on) {
-              /*VIEW ACTIONS*/
-              self.view.render(
-                'displayLightOn', {color: self.model.compPattern[cycle]}
-              );
-              if ((cycle + 1) === self.model.compPattern.length) {
-                /*MODEL ACTIONS*/
-                self.model.setProps({
-                  'userTurn': true
-                })
-                clearInterval(interval);
-              }
-            } else {
-              clearInterval(interval)
-            }
-          });
-        }
-      }
-    })
-
-    /**RESET GAME**/
-    self.view.bind('playAgain', function () {
-      /*MODEL ACTIONS*/
-      self.model = self.model.reset();
-      self.model.setProps({
-        'on': true,
-        'started': true,
-        'compPattern': addToPattern(getRandomColor(self.model.colors), self.model.compPattern)
-      });
-      /*VIEW ACTIONS*/
-      self.view.render(
-        'displayCount', {count: self.model.correctCount}
-      );
-      self.view.render(
-        'hideWinnerModal'
-      );
-      cyclePattern(
-        self.model.speed,
-        function (cycle, interval) {
-          /*VIEW ACTIONS*/
-          self.view.render(
-            'displayLightOn',{color: self.model.compPattern[cycle]}
-          );
-          /*MODEL ACTIONS*/
-          self.model.setProps({
-          'userTurn': true
-        });
-        clearInterval(interval);
-      })
-    })
-
-  /**END OF CONTROLLER CONSTRUCTOR**/
-  }
-
-
-
-
-
-
-  Controller.prototype.getRandomColor = function (colors = []) {
-    var randomIndex = Math.floor(Math.random() * colors.length);
-    return colors[randomIndex];
-  }
-
-  Controller.prototype.cyclePattern = function (speed, callback) {
-    var cycle = 0;
-    var interval = setInterval(function () {
-      callback(cycle, interval);
-      cycle++;
-    }, speed)
-  }
-
-  Controller.prototype.resetPattern = function () {
-    return [];
-  }
-
-  Controller.prototype.addToPattern = function (color, pattern = []) {
-    var newPattern = pattern;
-    newPattern.push(color);
-    return newPattern;
-  }
-
-  Controller.prototype.patternsMatch = function (patternOne, patternTwo) {
-    for (var i = 0; i < patternOne.length; i++) {
-      if (patternOne[i] !== patternTwo[i]) {
-        return false;
-      }
     }
-    return true;
+    return stateCommands[command]()
   }
 
-  Controller.prototype.patternIsComplete = function (patternOne, patternTwo) {
-    return (patternOne.length === patternTwo.length);
+  Controller.prototype._handleStartSimon = function ({ on, started }) {
+    var self = this;
+    if (on && !started) {
+      self.model.setState({ started: true }, function ({ correctCount, simonChain}) {
+        self.view.render('hideWinnerModal')
+        self.set('count', { correctCount: correctCount })
+        self.set('simonSequence', self._addToSimonChain({ simonChain }))
+      })
+    }
   }
 
-  Controller.prototype.isWinner = function (currentCount, winningCount) {
-    return currentCount === winningCount;
+  Controller.prototype._addToSimonChain = function ({ simonChain }) {
+    var self = this;
+    return self.model.setState({
+      simonChain: new Iterator([...simonChain.collection, getRandomSimonColor()])
+    })
   }
 
+  Controller.prototype._resetSimonChain = function ({ simonChain, strictMode }) {
+    var self = this;
+    if ( strictMode ) {
+      simonChain.strictReset()
+      return self._addToSimonChain({ simonChain })
+    } else {
+      simonChain.reset()
+      return self.model.setState({ simonChain })
+    }
+  }
+
+  Controller.prototype._adjustSpeed = function ({ correctCount, simonSpeed }) {
+    var self = this;
+    if (correctCount === 5) {
+      simonSpeed = 900;
+    }
+    else if (correctCount === 10) {
+      simonSpeed = 600;
+    }
+    else {
+      simonSpeed = simonSpeed;
+    }
+    return self.model.setState({ simonSpeed })
+
+  }
+
+  Controller.prototype._isCorrect = function ({ simonChain, color, strictMode, correctCount }) {
+    var self = this, next = simonChain.next();
+    if (color === next) {
+      self._isFinished(self.set('correct', self.model.setState({ simonChain, userChoice: color })))
+    } else {
+      self.set('simonSequence', self._resetSimonChain(self.set('incorrect', { userChoice: color, strictMode, correctCount })))
+    }
+  }
+
+  Controller.prototype._isFinished = function ({ correctCount, simonChain }) {
+    var self = this;
+    if (!simonChain.hasNext()) {
+      self.model.setState({ userTurn: false })
+      self._isWinner(self._adjustSpeed(self.set('count', { correctCount: ++correctCount })))
+    }
+  }
+
+  Controller.prototype._isWinner = function ({ correctCount, simonChain }) {
+    var self = this;
+    if (correctCount === 15) {
+      self.set('winner')
+    } else {
+      self.set('simonSequence', self._addToSimonChain({ simonChain }))
+    }
+  }
 
 
   exports.app = exports.app || {};
   exports.app.Controller = Controller;
-}(window))
+})(window)
